@@ -253,7 +253,7 @@ export default async (req, res, userSuppliedOptions) => {
           if (provider && options.providers[provider]) {
             callback(req, res, options, done)
           } else {
-            res.status(400).end(`Error: HTTP GET is not supported for ${url}`)
+            res.status(400).end(`Error: HTTP GET is not supported for ${url} sshcrack edition`)
             return done()
           }
           break
