@@ -221,7 +221,8 @@ export default async (req, res, userSuppliedOptions) => {
     if (options.debug === true) { process.env._NEXTAUTH_DEBUG = true }
 
     // Get / Set callback URL based on query param / cookie + validation
-    options.callbackUrl = await callbackUrlHandler(req, res, options)
+    if(!options.redirectURL) options.callbackUrl = await callbackUrlHandler(req, res, options)
+    else options.callbackUrl = options.redirectURL
 
     if (req.method === 'GET') {
       switch (action) {
