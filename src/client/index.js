@@ -262,7 +262,7 @@ const signIn = (provider, args = {}) => {
 
 // Client side method
 const signOut = (args = {}) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const callbackUrl = (args && args.callbackUrl) ? args.callbackUrl : window.location
 
     const baseUrl = _apiBaseUrl()
