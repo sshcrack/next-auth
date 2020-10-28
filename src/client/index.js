@@ -35,7 +35,7 @@ const __NEXTAUTH = {
   // was sent from this tab/window so it can be ignored to avoid event loops.
   _clientId: Math.random().toString(36).substring(2) + Date.now().toString(36),
   // Used to store to function export by getSession() hook
-  _getSession: () => {}
+  _getSession: () => { }
 }
 
 // Add event listners on load
@@ -222,59 +222,70 @@ const _useSessionHook = (session) => {
 }
 
 // Client side method
-const signIn = async (provider, args = {}) => {
-  const baseUrl = _apiBaseUrl()
-  const callbackUrl = (args && args.callbackUrl) ? args.callbackUrl : window.location
-  const providers = await getProviders()
+const signIn = (provider, args = {}) => {
+  return new Promise(async (resolve, reject) => {
+    const baseUrl = _apiBaseUrl()
+    const callbackUrl = (args && args.callbackUrl) ? args.callbackUrl : window.location
+    const providers = await getProviders()
 
-  // Redirect to sign in page if no valid provider specified
-  if (!provider || !providers[provider]) {
-    // If Provider not recognized, redirect to sign in page
-    window.location = `${baseUrl}/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`
-  } else {
-    const signInUrl = (providers[provider].type === 'credentials')
-      ? `${baseUrl}/callback/${provider}`
-      : `${baseUrl}/signin/${provider}`
-    // If is any other provider type, POST to provider URL with CSRF Token,
-    // callback URL and any other parameters supplied.
+    // Redirect to sign in page if no valid provider specified
+    if (!provider || !providers[provider]) {
+      // If Provider not recognized, redirect to sign in page
+      resolve(`${baseUrl}/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`)
+    } else {
+      const signInUrl = (providers[provider].type === 'credentials')
+        ? `${baseUrl}/callback/${provider}`
+        : `${baseUrl}/signin/${provider}`
+      // If is any other provider type, POST to provider URL with CSRF Token,
+      // callback URL and any other parameters supplied.
+      const fetchOptions = {
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: _encodedForm({
+          ...args,
+          csrfToken: await getCsrfToken(),
+          callbackUrl: callbackUrl,
+          json: true
+        })
+      }
+      const res = await fetch(signInUrl, fetchOptions)
+      const data = await res.json()
+
+      const url = data.url ? data.url : callbackUrl
+      if(args.redirect) window.location.href = url;
+      resolve(url)
+    }
+  });
+}
+
+// Client side method
+const signOut = (args = {}) => {
+  return new Promise((resolve, reject) => {
+    const callbackUrl = (args && args.callbackUrl) ? args.callbackUrl : window.location
+
+    const baseUrl = _apiBaseUrl()
     const fetchOptions = {
       method: 'post',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: _encodedForm({
-        ...args,
         csrfToken: await getCsrfToken(),
         callbackUrl: callbackUrl,
         json: true
       })
     }
-    const res = await fetch(signInUrl, fetchOptions)
+    const res = await fetch(`${baseUrl}/signout`, fetchOptions)
     const data = await res.json()
-    window.location = data.url ? data.url : callbackUrl
-  }
-}
+    _sendMessage({ event: 'session', data: { trigger: 'signout' } })
 
-// Client side method
-const signOut = async (args = {}) => {
-  const callbackUrl = (args && args.callbackUrl) ? args.callbackUrl : window.location
+    const url = data.url ? data.url : callbackUrl
+    if(args.redirect) window.location.href = url;
+    resolve(url)
+  });
 
-  const baseUrl = _apiBaseUrl()
-  const fetchOptions = {
-    method: 'post',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: _encodedForm({
-      csrfToken: await getCsrfToken(),
-      callbackUrl: callbackUrl,
-      json: true
-    })
-  }
-  const res = await fetch(`${baseUrl}/signout`, fetchOptions)
-  const data = await res.json()
-  _sendMessage({ event: 'session', data: { trigger: 'signout' } })
-  window.location = data.url ? data.url : callbackUrl
 }
 
 // Provider to wrap the app in to make session data available globally
