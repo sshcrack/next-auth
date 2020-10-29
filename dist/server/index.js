@@ -202,7 +202,12 @@ var _default = function () {
           process.env._NEXTAUTH_DEBUG = true;
         }
 
-        if (!options.redirectURL) options.callbackUrl = yield (0, _callbackUrlHandler.default)(req, res, options);else options.callbackUrl = options.redirectURL;
+        options.oldCallback = options.callbackUrl;
+
+        if (!options.redirectURL) {
+          options.callbackUrl = yield (0, _callbackUrlHandler.default)(req, res, options);
+          options.oldCallback = options.callbackUrl;
+        } else options.callbackUrl = options.redirectURL;
 
         if (req.method === 'GET') {
           switch (action) {
@@ -242,6 +247,8 @@ var _default = function () {
               break;
 
             case 'signout':
+              console.log("SignOut");
+
               if (options.pages.signOut) {
                 return redirect("".concat(options.pages.signOut).concat(options.pages.signOut.includes('?') ? '&' : '?', "error=").concat(error));
               }
@@ -250,16 +257,18 @@ var _default = function () {
                 baseUrl,
                 basePath,
                 csrfToken,
-                callbackUrl: options.callbackUrl
+                callbackUrl: options.signOutRedirectUrl || options.oldCallback
               }, done);
 
               break;
 
             case 'callback':
+              console.log("Callback");
+
               if (provider && options.providers[provider]) {
                 (0, _callback.default)(req, res, options, done);
               } else {
-                res.status(400).end("Error: HTTP GET is not supported for ".concat(url, " sshcrack edition"));
+                res.status(400).end("Error: HTTP GET is not supported for ".concat(url));
                 return done();
               }
 
