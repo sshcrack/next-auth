@@ -249,11 +249,13 @@ export default async (req, res, userSuppliedOptions) => {
           pages.render(req, res, 'signin', { baseUrl, basePath, providers: Object.values(options.providers), callbackUrl: options.callbackUrl, csrfToken }, done)
           break
         case 'signout':
+          console.log("SignOut")
           if (options.pages.signOut) { return redirect(`${options.pages.signOut}${options.pages.signOut.includes('?') ? '&' : '?'}error=${error}`) }
 
           pages.render(req, res, 'signout', { baseUrl, basePath, csrfToken, callbackUrl: options.signOutRedirectUrl || options.oldCallback }, done)
           break
         case 'callback':
+          console.log("Callback")
           if (provider && options.providers[provider]) {
             callback(req, res, options, done)
           } else {
