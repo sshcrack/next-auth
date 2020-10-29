@@ -313,6 +313,7 @@ var signOut = function signOut() {
   return new Promise(function () {
     var _ref10 = _asyncToGenerator(function* (resolve, reject) {
       var callbackUrl = args && args.callbackUrl ? args.callbackUrl : window.location;
+      console.log("SignOut", args.callbackUrl);
 
       var baseUrl = _apiBaseUrl();
 

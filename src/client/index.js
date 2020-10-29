@@ -264,6 +264,7 @@ const signIn = (provider, args = {}) => {
 const signOut = (args = {}) => {
   return new Promise(async (resolve, reject) => {
     const callbackUrl = (args && args.callbackUrl) ? args.callbackUrl : window.location
+    console.log("SignOut", args.callbackUrl)
 
     const baseUrl = _apiBaseUrl()
     const fetchOptions = {
