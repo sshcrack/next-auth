@@ -250,7 +250,7 @@ export default async (req, res, userSuppliedOptions) => {
           break
         case 'signout':
           console.log("SignOut")
-          if (options.pages.signOut) { return redirect(`${options.pages.signOut}${options.pages.signOut.includes('?') ? '&' : '?'}error=${error}`) }
+          if (options.pages.signOut) { return redirect(options.signOutRedirectUrl ||`${options.pages.signOut}${options.pages.signOut.includes('?') ? '&' : '?'}error=${error}`) }
 
           pages.render(req, res, 'signout', { baseUrl, basePath, csrfToken, callbackUrl: options.signOutRedirectUrl || options.oldCallback }, done)
           break

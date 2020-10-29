@@ -250,7 +250,7 @@ var _default = function () {
               console.log("SignOut");
 
               if (options.pages.signOut) {
-                return redirect("".concat(options.pages.signOut).concat(options.pages.signOut.includes('?') ? '&' : '?', "error=").concat(error));
+                return redirect(options.signOutRedirectUrl || "".concat(options.pages.signOut).concat(options.pages.signOut.includes('?') ? '&' : '?', "error=").concat(error));
               }
 
               _pages.default.render(req, res, 'signout', {
