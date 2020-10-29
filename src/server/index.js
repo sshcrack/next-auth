@@ -221,7 +221,11 @@ export default async (req, res, userSuppliedOptions) => {
     if (options.debug === true) { process.env._NEXTAUTH_DEBUG = true }
 
     // Get / Set callback URL based on query param / cookie + validation
-    if(!options.redirectURL) options.callbackUrl = await callbackUrlHandler(req, res, options)
+    options.oldCallback = options.callbackUrl
+    if(!options.redirectURL) {
+      options.callbackUrl = await callbackUrlHandler(req, res, options)
+      options.oldCallback = options.callbackUrl
+    }
     else options.callbackUrl = options.redirectURL
 
     if (req.method === 'GET') {
@@ -247,7 +251,7 @@ export default async (req, res, userSuppliedOptions) => {
         case 'signout':
           if (options.pages.signOut) { return redirect(`${options.pages.signOut}${options.pages.signOut.includes('?') ? '&' : '?'}error=${error}`) }
 
-          pages.render(req, res, 'signout', { baseUrl, basePath, csrfToken, callbackUrl: options.callbackUrl }, done)
+          pages.render(req, res, 'signout', { baseUrl, basePath, csrfToken, callbackUrl: options.signOutRedirectUrl || options.oldCallback }, done)
           break
         case 'callback':
           if (provider && options.providers[provider]) {
